@@ -21,14 +21,35 @@ class Code39:
         '%': '101001001001', '*': '100101101101'
     }
 
-    def __init__(self, data_string, height=100, ratio=2, border=10):
+    def __init__(self, data_string, height=60, ratio=2, border=10):
         self.data = self.encode(data_string)
         self.data_string = data_string
-        self.height = height
+        self.height = height * ratio
         self.ratio = ratio
         self.border = border
+        self.image = self.draw()
 
-    def createBarcode(self):
+    def encode(self, barcode_string):
+        encoded_string = '100101101101'			# Start code
+
+        for char in barcode_string:
+            encoded_string += self.CODE39[char.upper()]
+
+        encoded_string += '100101101101'		# End code
+
+        return encoded_string
+
+    def decode(barcode_string):
+        decoded_string = ''
+
+        for char in barcode_string:
+            # Need to find an 'invert method'
+            # decoded_string += self.CODE128
+            pass
+
+        return decoded_string
+
+    def draw(self):
         width = (self.border * 2) + len(self.data) * self.ratio
 
         img = Image.new("RGB", (width, self.height), "white")
@@ -46,18 +67,10 @@ class Code39:
         draw.text((20, self.height-20), self.data_string, (0, 0, 0))
         del draw
 
-        # write to stdout
-        img.save(self.data_string + ".png")
+        return img
 
-    def encode(self, barcode_string):
-        encoded_string = '100101101101'			# Start code
-
-        for char in barcode_string:
-            encoded_string += self.CODE39[char.upper()]
-
-        encoded_string += '100101101101'		# End code
-
-        return encoded_string
+    def save(self):
+        self.image.save(self.data_string + ".png")
 
 
 class Code128:
@@ -119,10 +132,10 @@ class Code128:
         '|': 92, '}': 93, '~': 94
     }
 
-    def __init__(self, data_string, height=100, ratio=2, border=10):
+    def __init__(self, data_string, height=60, ratio=2, border=10):
         self.data = self.encode(data_string)
         self.data_string = data_string
-        self.height = height
+        self.height = height * ratio
         self.ratio = ratio
         self.border = border
         self.image = self.draw()
@@ -181,7 +194,7 @@ def readInputFile(inputFile):
         for line in barcodeFile.read().splitlines():
             barcode_data = line
             barcode = Code39(barcode_data)
-            barcode.createBarcode()
+            barcode.save()
 
 
 def readInputFileWithEncoding(inputFile, encoding):
@@ -190,7 +203,7 @@ def readInputFileWithEncoding(inputFile, encoding):
             barcode_data = line
             if encoding == 'Code39':
                 barcode = Code39(barcode_data)
-                barcode.createBarcode()
+                barcode.save()
             elif encoding == 'Code128':
                 barcode = Code128(barcode_data)
                 barcode.save()
